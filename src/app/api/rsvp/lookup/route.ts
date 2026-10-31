@@ -6,7 +6,7 @@ export async function POST(req: Request) {
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return NextResponse.json({ error: 'RSVP ainda não está configurado.' }, { status: 503 });
   const parsed = bodySchema.safeParse(await req.json().catch(() => null)); if (!parsed.success) return NextResponse.json({ error: 'Informe seu nome completo.' }, { status: 400 });
   const db = adminDb(); const needle = parsed.data.name.replace(/[,%()]/g, ' ').trim();
-  const { data: guests, error } = await db.from('guests').select('id,name,group_id,rsvp_status').ilike('name', `%${needle}%`).limit(8);
+  const { data: guests, error } = await db.from('guests').select('id,name,group_id,group_name,rsvp_status').ilike('name', `%${needle}%`).limit(8);
   if (error) return NextResponse.json({ error: 'Não foi possível buscar seu convite agora.' }, { status: 500 });
   const exact = (guests || []).find(g => g.name.toLocaleLowerCase('pt-BR') === parsed.data.name.toLocaleLowerCase('pt-BR'));
   if (!exact) return NextResponse.json({ error: 'Não encontramos esse nome. Confira a grafia ou fale com os noivos.' }, { status: 404 });
