@@ -1,5 +1,0 @@
-import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
-import AdminDashboard from '@/components/AdminDashboard';
-export const dynamic = 'force-dynamic';
-export default async function Admin() { if (!process.env.NEXT_PUBLIC_SUPABASE_URL) redirect('/admin/login'); const db = createClient(); const { data: { user } } = await db.auth.getUser(); if (!user) redirect('/admin/login'); const [guests, gifts, contributions, wedding, schedule, gallery] = await Promise.all([db.from('guests').select('*').order('name'), db.from('gifts').select('*').order('sort_order'), db.from('contributions').select('*').order('created_at', { ascending: false }), db.from('weddings').select('*').limit(1).maybeSingle(), db.from('event_schedule').select('*').order('sort_order'), db.from('gallery').select('*').order('sort_order')]); return <AdminDashboard initial={{ guests: guests.data || [], gifts: gifts.data || [], contributions: contributions.data || [], wedding: wedding.data, schedule: schedule.data || [], gallery: gallery.data || [] }} email={user.email || ''}/>; }
